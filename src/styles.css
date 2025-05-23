@@ -1,0 +1,19 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.clock {
+    font-size: 1rem;
+    align-self: center;
+}
+
+pre {
+    white-space: pre-wrap; /* Ensure long TAF strings wrap within their container */
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+    cursor: pointer; /* Ensure cursor changes to pointer for clickable images */
+}
