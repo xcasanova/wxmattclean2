@@ -20,7 +20,7 @@ const MetarContent = ({ metar, isError, airportCode }) => {
 
     return (
         <Card className="bg-card/50 mb-4">
-            <CardHeader className="p-4">
+            <CardHeader className="m-0 pr-4 pl-4">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Plane className="h-4 w-4" />
                     {data.station.name} ({data.icao})

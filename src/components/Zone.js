@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import WebcamImages from './WebcamImages';
 import MetarContent from './MetarContent';
 import TafContent from './TafContent';
@@ -9,17 +9,20 @@ import { Card, CardContent } from "../components/ui/card";
 const Zone = ({ zone, handleModalOpen }) => {
     const { airports, cwa } = zone;
     const [forecast, setForecast] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const getForecast = async () => {
+    const getForecast = useCallback(async () => {
         if (cwa) {
+            setIsLoading(true);
             const forecastData = await fetchForecast(cwa);
             setForecast(forecastData);
+            setIsLoading(false);
         }
-    };
+    }, [cwa]);
 
     useEffect(() => {
         getForecast();
-    }, [cwa]);
+    }, [getForecast]);
 
     return (
         <Card className="bg-card">
@@ -31,7 +34,11 @@ const Zone = ({ zone, handleModalOpen }) => {
             <CardContent className="pr-6 pl-6">
                 <div className="space-y-6">
                     <div>
-                        <ForecastContent forecast={forecast} onRefresh={getForecast} />
+                        {isLoading ? (
+                            <div className="text-center py-4">Loading... please wait</div>
+                        ) : (
+                            <ForecastContent forecast={forecast} onRefresh={getForecast} />
+                        )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>

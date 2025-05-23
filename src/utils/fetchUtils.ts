@@ -1,4 +1,3 @@
-/* global gapi */
 import { getStoredWeatherData, storeWeatherData } from './StorageUtils';
 import { ZoneData, ZoneWithAirports, AirportData } from '../types/ZoneData';
 import { MetarData, TafData, ForecastResponse } from '../types/WeatherData';

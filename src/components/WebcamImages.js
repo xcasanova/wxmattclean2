@@ -7,7 +7,7 @@ const WebcamImages = ({ webcamUrls, handleModalOpen }) => {
         <div className="space-y-4">
             {webcamUrls.map((webcam, idx) => (
                 <Card key={idx} className="bg-card/50">
-                    <CardHeader className="p-4">
+                    <CardHeader className="m-0 pr-4 pl-4">
                         <CardTitle className="text-sm font-medium flex items-center gap-2">
                             <Video className="h-4 w-4" />
                             {webcam.name}

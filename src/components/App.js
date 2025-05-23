@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSpreadsheetData, fetchWeatherData, fetchForecast } from '../utils/fetchUtils.ts';
+import { fetchSpreadsheetData, fetchWeatherData } from '../utils/fetchUtils.ts';
 import { timeSince } from '../utils/timeUtils'; // Ensure timeUtils is imported
 import Zone from './Zone';
 import CustomModal from './Modal';
 import { Button } from "../components/ui/button";
 import { Toggle } from "../components/ui/toggle";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { ThemeProvider } from "./theme-provider";
 import { ThemeToggle } from "./theme-toggle";
-import { RefreshCw, ChevronDown, CloudSun } from "lucide-react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+import { CloudSun } from "lucide-react";
 
 const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 
@@ -23,7 +16,8 @@ const App = () => {
     const [lastUpdateTime, setLastUpdateTime] = useState(null);
     const [modalSrc, setModalSrc] = useState('');
     const [forceRefresh, setForceRefresh] = useState(false);
-    const [selectedZone, setSelectedZone] = useState(null);
+    const [selectedZone, setSelectedZone] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadGoogleAPI = () => {
@@ -42,15 +36,21 @@ const App = () => {
         };
 
         const fetchData = async () => {
-            const zones = await fetchSpreadsheetData(window.gapi, forceRefresh);
-            const weatherData = await fetchWeatherData(zones, forceRefresh);
+            setIsLoading(true);
+            try {
+                const zones = await fetchSpreadsheetData(window.gapi, forceRefresh);
+                const weatherData = await fetchWeatherData(zones, forceRefresh);
 
-            setData(weatherData);
-            if (zones.length > 0) {
-                setSelectedZone(zones[0].title);
+                setData(weatherData);
+                if (zones.length > 0) {
+                    setSelectedZone(zones[0].title);
+                }
+                setLastUpdateTime(new Date());
+                setForceRefresh(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
-            setLastUpdateTime(new Date());
-            setForceRefresh(false);
+            setIsLoading(false);
         };
 
         loadGoogleAPI();
@@ -95,7 +95,7 @@ const App = () => {
                             <div className="flex items-center gap-8">
                                 <h1 className="text-4xl font-bold flex items-center gap-2">
                                     <CloudSun className="w-8 h-8" />
-                                    Bay area pilot wx
+                                    Bay area pilot WX
                                 </h1>
                                 <div className="flex flex-wrap gap-2">
                                     {data.map((zone, index) => (
@@ -108,7 +108,8 @@ const App = () => {
                                         >
                                             {zone.title}
                                         </Toggle>
-                                    ))}
+                                    ))
+                                    }
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -117,18 +118,22 @@ const App = () => {
                         </div>
                     </div>
                 </div>
-                <div className="max-w-4xl mx-auto px-4 py-8">
-                    <div id="zones" className="space-y-6">
-                        {data.map((zone, index) => (
-                            selectedZone === zone.title && (
-                                <Zone zone={zone} handleModalOpen={handleModalOpen} />
-                            )
-                        ))}
-                    </div>
+                {isLoading ? (
+                    <div className="text-center py-4 text-sm">The application is loading... please wait</div>
+                ) : (
+                    <div className="max-w-4xl mx-auto px-4 py-8">
+                        <div id="zones" className="space-y-6">
+                            {data.map((zone, index) => (
+                                selectedZone === zone.title && (
+                                    <Zone zone={zone} handleModalOpen={handleModalOpen} />
+                                )
+                            ))}
+                        </div>
 
-                    <div className="text-center mt-6 text-muted-foreground" id="clock"></div>
-                    <CustomModal modalSrc={modalSrc} handleModalClose={handleModalClose} />
-                </div>
+                        <div className="text-center mt-6 text-muted-foreground" id="clock"></div>
+                        <CustomModal modalSrc={modalSrc} handleModalClose={handleModalClose} />
+                    </div>
+                )}
             </div>
         </ThemeProvider>
     );
