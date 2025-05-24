@@ -26,11 +26,6 @@ const Zone = ({ zone, handleModalOpen }) => {
 
     return (
         <Card className="bg-card">
-            {/* <CardHeader>
-                <CardTitle className="text-center text-xl font-bold text-primary">
-                    Weather outlook for {title}
-                </CardTitle>
-            </CardHeader> */}
             <CardContent className="pr-6 pl-6">
                 <div className="space-y-6">
                     <div>
@@ -40,27 +35,27 @@ const Zone = ({ zone, handleModalOpen }) => {
                             <ForecastContent forecast={forecast} onRefresh={getForecast} />
                         )}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <WebcamImages webcamUrls={airports[0].webcamUrls} handleModalOpen={handleModalOpen} />
-                        </div>
+                    <div>
+                        <WebcamImages webcamUrls={airports[0].webcamUrls} handleModalOpen={handleModalOpen} />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             {airports.map((airportData, index) => (
-                                <MetarContent 
-                                    key={index} 
-                                    metar={airportData.metarData[0]} 
-                                    isError={airportData.isError} 
-                                    airportCode={airportData.code} 
+                                <MetarContent
+                                    key={index}
+                                    metar={airportData.metarData[0]}
+                                    isError={airportData.isError}
+                                    airportCode={airportData.code}
                                 />
                             ))}
                         </div>
                         <div>
                             {airports.map((airportData, index) => (
-                                <TafContent 
-                                    key={index} 
-                                    taf={airportData.tafData[0]} 
-                                    isError={airportData.isError} 
-                                    airportCode={airportData.code} 
+                                <TafContent
+                                    key={index}
+                                    taf={airportData.tafData[0]}
+                                    isError={airportData.isError}
+                                    airportCode={airportData.code}
                                 />
                             ))}
                         </div>

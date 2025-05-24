@@ -154,7 +154,11 @@ const App = () => {
                         <div id="zones" className="space-y-6">
                             {data.map((zone, index) => (
                                 selectedZone === zone.title && (
-                                    <Zone zone={zone} handleModalOpen={handleModalOpen} />
+                                    <Zone 
+                                        key={zone.title} 
+                                        zone={zone} 
+                                        handleModalOpen={handleModalOpen} 
+                                    />
                                 )
                             ))}
                         </div>

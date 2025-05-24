@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Plane, Wind } from "lucide-react";
+import { Cloud, Plane, Wind } from "lucide-react";
 import { timeSince } from '../utils/timeUtils';
 
 const MetarContent = ({ metar, isError, airportCode }) => {
@@ -18,6 +18,9 @@ const MetarContent = ({ metar, isError, airportCode }) => {
     const reportedTime = new Date(data.observed + "Z");
     const timeAgo = timeSince(reportedTime);
 
+
+    console.log(data);
+
     return (
         <Card className="bg-card/50 mb-4">
             <CardHeader className="m-0 pr-4 pl-4">
@@ -30,17 +33,25 @@ const MetarContent = ({ metar, isError, airportCode }) => {
                 <div className="p-3 rounded-md bg-muted font-mono text-sm">
                     <span className="font-semibold">METAR:</span> {data.raw_text}
                 </div>
-                
-                <div className="text-right text-sm text-muted-foreground">
-                    {timeAgo} ago
-                </div>
 
                 <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10">
                     <Wind className="h-4 w-4" />
                     <span className="text-sm">
-                        Wind: {data.wind?.degrees}° at {data.wind?.speed_kts} knots
+                        Wind: {data.wind?.degrees}° at {data.wind?.speed_kts} knots {data.wind?.gust_kts ? `, Gusts ${data.wind.gust_kts} knots` : ''}
                     </span>
                 </div>
+
+                {data.ceiling && <div className="flex items-center gap-2 p-3 rounded-md bg-red-500/10 border border-red-500/20">
+                    <Cloud className="h-4 w-4" />
+                    <span className="text-sm">
+                        Ceiling: {data.ceiling?.feet} feet
+                    </span>
+                </div>}
+
+                <div className="text-right text-sm text-muted-foreground">
+                    {timeAgo} ago
+                </div>
+                
             </CardContent>
         </Card>
     );

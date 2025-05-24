@@ -46,7 +46,7 @@ const MetarContent = ({ metar, isError, airportCode }) => {
                 Temp/Dewpoint: {data.temperature?.celsius}°C / {data.dewpoint.celsius}°C
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
-                Wind: {data.wind?.degrees}° at {data.wind?.speed_kts} knots
+                Wind: {data.wind?.degrees}° at {data.wind?.speed_kts} knots {data.wind?.gust ? `, gusting at ${data.wind.gust.speed_kts} knots` : ''}
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
                 Visibility: {data.visibility?.miles_float} miles

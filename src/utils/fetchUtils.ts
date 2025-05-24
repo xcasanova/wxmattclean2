@@ -68,7 +68,6 @@ export async function fetchSpreadsheetData(gapi: any, forceRefresh: boolean = fa
             let webcamUrls;
             try {
                 webcamUrls = JSON.parse(row[2]); // Parse JSON object for webcam names and URLs
-                console.log(webcamUrls);
             } catch (error) {
                 console.error(`Error parsing JSON for row ${row}:`, error);
                 webcamUrls = [];
@@ -126,7 +125,7 @@ export async function fetchWeatherData(zones: ZoneData[], forceRefresh: boolean 
                 try {
                     const metarResponse = await fetch(`https://api.checkwx.com/metar/${code}/decoded`, {
                         headers: {
-                            'X-API-Key': '0221e0aa85274a45a7e146377c'
+                            'X-API-Key': config.checkwx.apiKey
                         }
                     });
                     
@@ -138,7 +137,7 @@ export async function fetchWeatherData(zones: ZoneData[], forceRefresh: boolean 
                     
                     const tafResponse = await fetch(`https://api.checkwx.com/taf/${code}/nearest`, {
                         headers: {
-                            'X-API-Key': '0221e0aa85274a45a7e146377c'
+                            'X-API-Key': config.checkwx.apiKey
                         }
                     });
                     

@@ -8,6 +8,9 @@ export const config = {
         key: 'spreadsheet_data_cache',
         expiry: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
         enabled: false
+    },
+    checkwx: {
+        apiKey: '0221e0aa85274a45a7e146377c'
     }
 } as const;
 

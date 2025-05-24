@@ -7,7 +7,7 @@ export function formatTaf(taf) {
         const options = { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
         return `<br>From ${localDate.toLocaleDateString('en-US', options)}`;
     }).replace(/(\d{3})(\d{2})(G\d{2})?KT/g, (_, dir, speed, gust) => {
-        let result = `Wind: ${dir}° at ${speed} knots`;
+        let result = `Wind: ${dir}° at ${speed} knots ${gust ? `, gusting at ${gust.slice(1)} knots` : ''}`;
         if (gust) {
             result += `, gusting at ${gust.slice(1)} knots`;
         }
