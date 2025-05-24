@@ -3,6 +3,11 @@ import { MetarData, TafData } from './WeatherData';
 export interface WebcamUrl {
     name: string;
     url: string;
+    zoom?: {
+        x: number;
+        y: number;
+        percent: number;
+    };
 }
 
 export interface ZoneData {
@@ -24,4 +29,4 @@ export interface AirportData {
 
 export interface ZoneWithAirports extends Omit<ZoneData, 'codes'> {
     airports: AirportData[];
-} 
+}

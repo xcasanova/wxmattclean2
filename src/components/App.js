@@ -8,27 +8,40 @@ import { Toggle } from "../components/ui/toggle";
 import { ThemeProvider } from "./theme-provider";
 import { ThemeToggle } from "./theme-toggle";
 import { CloudSun } from "lucide-react";
-
-const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+import { config } from '../config';
 
 const App = () => {
     const [data, setData] = useState([]);
     const [lastUpdateTime, setLastUpdateTime] = useState(null);
     const [modalSrc, setModalSrc] = useState('');
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [currentWebcamUrls, setCurrentWebcamUrls] = useState([]);
+    const [currentWebcamNames, setCurrentWebcamNames] = useState([]);
+    const [currentWebcamZooms, setCurrentWebcamZooms] = useState([]);
     const [forceRefresh, setForceRefresh] = useState(false);
     const [selectedZone, setSelectedZone] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadGoogleAPI = () => {
+            if (!window.gapi) {
+                console.error('Google API not loaded');
+                return;
+            }
             window.gapi.load('client', initClient);
         };
 
         const initClient = () => {
+            if (!config.google.apiKey) {
+                console.error('Google API key not set');
+                return;
+            }
+
             window.gapi.client.init({
-                apiKey: GOOGLE_API_KEY,
+                apiKey: config.google.apiKey,
                 discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
             }).then(() => {
+                console.log('Google API client initialized successfully');
                 fetchData();
             }).catch(error => {
                 console.error('Error initializing GAPI client:', error);
@@ -38,6 +51,9 @@ const App = () => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                if (!config.google.spreadsheetId) {
+                    throw new Error('Spreadsheet ID not set');
+                }
                 const zones = await fetchSpreadsheetData(window.gapi, forceRefresh);
                 const weatherData = await fetchWeatherData(zones, forceRefresh);
 
@@ -65,12 +81,25 @@ const App = () => {
         return () => clearInterval(interval);
     }, [lastUpdateTime]);
 
-    const handleModalOpen = (src) => {
+    const handleModalOpen = (src, webcamUrls, webcamNames, webcamZooms) => {
         setModalSrc(src);
+        setCurrentWebcamUrls(webcamUrls);
+        setCurrentImageIndex(webcamUrls.indexOf(src));
+        setCurrentWebcamNames(webcamNames);
+        setCurrentWebcamZooms(webcamZooms);
     };
 
     const handleModalClose = () => {
         setModalSrc('');
+        setCurrentImageIndex(0);
+        setCurrentWebcamUrls([]);
+        setCurrentWebcamNames([]);
+        setCurrentWebcamZooms([]);
+    };
+
+    const handleImageNavigate = (newIndex) => {
+        setModalSrc(currentWebcamUrls[newIndex]);
+        setCurrentImageIndex(newIndex);
     };
 
     const handleZoneChange = (zone) => {
@@ -131,7 +160,15 @@ const App = () => {
                         </div>
 
                         <div className="text-center mt-6 text-muted-foreground" id="clock"></div>
-                        <CustomModal modalSrc={modalSrc} handleModalClose={handleModalClose} />
+                        <CustomModal 
+                            modalSrc={modalSrc} 
+                            handleModalClose={handleModalClose}
+                            webcamUrls={currentWebcamUrls}
+                            currentIndex={currentImageIndex}
+                            onNavigate={handleImageNavigate}
+                            webcamName={currentWebcamNames[currentImageIndex]}
+                            webcamZoom={currentWebcamZooms[currentImageIndex]}
+                        />
                     </div>
                 )}
             </div>

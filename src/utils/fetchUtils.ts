@@ -2,6 +2,7 @@ import { getStoredWeatherData, storeWeatherData } from './StorageUtils';
 import { ZoneData, ZoneWithAirports, AirportData } from '../types/ZoneData';
 import { MetarData, TafData, ForecastResponse } from '../types/WeatherData';
 import { SpreadsheetError, WeatherError, ForecastError, CacheError, APIError } from '../types/Errors';
+import { config } from '../config';
 
 declare global {
     interface Window {
@@ -9,42 +10,28 @@ declare global {
     }
 }
 
-const GOOGLE_API_KEY = 'AIzaSyAVd8hOm79lUcB-ZyZf0MlfT-XR3yTX5CI';
-const SPREADSHEET_ID = '10OASKdt3-K49U2Gz5WKxZH0GQgDQBFxA2TdkmR7XZ68';
-const RANGE = 'Sheet1!A:E';
-
-const CACHE_KEY = 'spreadsheet_data_cache';
-const CACHE_EXPIRY = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
-
 function getCachedSpreadsheetData(): ZoneData[] | null {
-    try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (!cached) return null;
-        
-        const { data, timestamp } = JSON.parse(cached);
-        const now = new Date().getTime();
-        
-        if (now - timestamp > CACHE_EXPIRY) {
-            localStorage.removeItem(CACHE_KEY);
-            return null;
-        }
-        
-        return data;
-    } catch (error) {
-        throw new CacheError('Failed to retrieve cached spreadsheet data');
+    if (!config.cache.enabled) return null;
+    
+    const cached = localStorage.getItem(config.cache.key);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp > config.cache.expiry) {
+        localStorage.removeItem(config.cache.key);
+        return null;
     }
+
+    return data;
 }
 
 function setCachedSpreadsheetData(data: ZoneData[]): void {
-    try {
-        const cacheData = {
-            data,
-            timestamp: new Date().getTime()
-        };
-        localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-    } catch (error) {
-        throw new CacheError('Failed to cache spreadsheet data');
-    }
+    if (!config.cache.enabled) return;
+    
+    localStorage.setItem(config.cache.key, JSON.stringify({
+        data,
+        timestamp: Date.now()
+    }));
 }
 
 function parseSatelliteUrl(rowContent: { url?: string } | null): string | null {
@@ -67,9 +54,9 @@ export async function fetchSpreadsheetData(gapi: any, forceRefresh: boolean = fa
 
         await gapi.client.load('sheets', 'v4');
         const response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: RANGE,
-            key: GOOGLE_API_KEY
+            spreadsheetId: config.google.spreadsheetId,
+            range: config.google.range,
+            key: config.google.apiKey
         });
 
         if (!response.result.values) {
@@ -81,6 +68,7 @@ export async function fetchSpreadsheetData(gapi: any, forceRefresh: boolean = fa
             let webcamUrls;
             try {
                 webcamUrls = JSON.parse(row[2]); // Parse JSON object for webcam names and URLs
+                console.log(webcamUrls);
             } catch (error) {
                 console.error(`Error parsing JSON for row ${row}:`, error);
                 webcamUrls = [];
