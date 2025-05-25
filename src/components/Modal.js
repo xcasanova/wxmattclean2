@@ -2,8 +2,8 @@ import React from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 
-const CustomModal = ({ modalSrc, handleModalClose, webcamUrls, currentIndex, onNavigate, webcamName, webcamZoom }) => {
-    if (!modalSrc) return null;
+const Modal = ({ isOpen, onClose, imageUrl, imageUrls, currentIndex, onNavigate, imageNames, imageZooms }) => {
+    if (!isOpen) return null;
 
     const handlePrevious = () => {
         if (currentIndex > 0) {
@@ -12,7 +12,7 @@ const CustomModal = ({ modalSrc, handleModalClose, webcamUrls, currentIndex, onN
     };
 
     const handleNext = () => {
-        if (currentIndex < webcamUrls.length - 1) {
+        if (currentIndex < imageUrls.length - 1) {
             onNavigate(currentIndex + 1);
         }
     };
@@ -24,7 +24,7 @@ const CustomModal = ({ modalSrc, handleModalClose, webcamUrls, currentIndex, onN
                     variant="ghost"
                     size="icon"
                     className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white"
-                    onClick={handleModalClose}
+                    onClick={onClose}
                 >
                     <X className="h-6 w-6" />
                 </Button>
@@ -40,7 +40,7 @@ const CustomModal = ({ modalSrc, handleModalClose, webcamUrls, currentIndex, onN
                     </Button>
                 )}
                 
-                {currentIndex < webcamUrls.length - 1 && (
+                {currentIndex < imageUrls.length - 1 && (
                     <Button
                         variant="ghost"
                         size="icon"
@@ -52,18 +52,18 @@ const CustomModal = ({ modalSrc, handleModalClose, webcamUrls, currentIndex, onN
                 )}
 
                 <h1 className="absolute top-4 left-4 z-50 bg-black/50 px-4 py-2 text-white text-2xl font-bold">
-                    {webcamName}
+                    {imageNames[currentIndex]}
                 </h1>
 
                 <img
-                    src={modalSrc}
+                    src={imageUrl}
                     alt="Webcam view"
                     className="w-full h-full object-contain"
-                    style={webcamZoom ? {
-                        objectPosition: `${(webcamZoom.x * 100)}% ${(webcamZoom.y * 100)}%`,
+                    style={imageZooms[currentIndex] ? {
+                        objectPosition: `${(imageZooms[currentIndex].x * 100)}% ${(imageZooms[currentIndex].y * 100)}%`,
                         objectFit: 'cover',
-                        transform: `scale(${webcamZoom.percent})`,
-                        transformOrigin: `${webcamZoom.x * 100}% ${webcamZoom.y * 100}%`
+                        transform: `scale(${imageZooms[currentIndex].percent})`,
+                        transformOrigin: `${imageZooms[currentIndex].x * 100}% ${imageZooms[currentIndex].y * 100}%`
                     } : undefined}
                 />
             </div>
@@ -71,4 +71,4 @@ const CustomModal = ({ modalSrc, handleModalClose, webcamUrls, currentIndex, onN
     );
 };
 
-export default CustomModal;
+export default Modal;

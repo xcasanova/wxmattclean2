@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSpreadsheetData, fetchWeatherData } from '../utils/fetchUtils.ts';
+import { fetchSpreadsheetData, fetchWeatherData } from '../utils/fetchUtils';
 import { timeSince } from '../utils/timeUtils'; // Ensure timeUtils is imported
 import Zone from './Zone';
-import CustomModal from './Modal';
-import { Button } from "../components/ui/button";
-import { Toggle } from "../components/ui/toggle";
+import Modal from './Modal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ThemeProvider } from "./theme-provider";
-import { ThemeToggle } from "./theme-toggle";
-import { CloudSun } from "lucide-react";
 import { config } from '../config';
+import { Loader2 } from 'lucide-react';
 
 const App = () => {
     const [data, setData] = useState([]);
@@ -21,6 +19,7 @@ const App = () => {
     const [forceRefresh, setForceRefresh] = useState(false);
     const [selectedZone, setSelectedZone] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const loadGoogleAPI = () => {
@@ -65,6 +64,7 @@ const App = () => {
                 setForceRefresh(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                setError('Error fetching data. Please try again later.');
             }
             setIsLoading(false);
         };
@@ -111,48 +111,44 @@ const App = () => {
     return (
         <ThemeProvider defaultTheme="dark" storageKey="weathermatt-theme">
             <div className="min-h-screen bg-background text-foreground">
-                <Button
-                    variant="outline"
-                    className="absolute top-4 left-4"
-                    onClick={() => window.location.href = 'https://www.122point8.com'}
-                >
-                    122point8.com
-                </Button>
-                <div className="border-b">
-                    <div className="max-w-4xl mx-auto px-4 py-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-8">
-                                <h1 className="text-4xl font-bold flex items-center gap-2">
-                                    <CloudSun className="w-8 h-8" />
-                                    Bay area pilot WX
-                                </h1>
-                                <div className="flex flex-wrap gap-2">
-                                    {data.map((zone, index) => (
-                                        <Toggle
-                                            key={index}
-                                            pressed={selectedZone === zone.title}
-                                            onPressedChange={() => handleZoneChange(zone.title)}
-                                            aria-label={zone.title}
-                                            className="px-4 py-2 rounded-md bg-background hover:bg-accent text-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                                        >
-                                            {zone.title}
-                                        </Toggle>
-                                    ))
-                                    }
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <ThemeToggle />
+                <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                    <div className="container flex h-14 items-center">
+                        <div className="mr-4 flex">
+                            <a className="mr-6 flex items-center space-x-2" href="/">
+                                <span className="font-bold">SF Bay Pilot</span>
+                            </a>
+                        </div>
+                        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+                            <div className="w-full flex-1 md:w-auto md:flex-none">
+                                <Select
+                                    value={selectedZone}
+                                    onValueChange={handleZoneChange}
+                                >
+                                    <SelectTrigger className="w-full md:w-[200px]">
+                                        <SelectValue placeholder="Select a zone" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {data.map((zone) => (
+                                            <SelectItem key={zone.title} value={zone.title}>
+                                                {zone.title}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </div>
-                </div>
-                {isLoading ? (
-                    <div className="text-center py-4 text-sm">The application is loading... please wait</div>
-                ) : (
-                    <div className="max-w-4xl mx-auto px-4 py-8">
-                        <div id="zones" className="space-y-6">
-                            {data.map((zone, index) => (
+                </header>
+                <main className="container py-6">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center h-64">
+                            <Loader2 className="h-8 w-8 animate-spin" />
+                        </div>
+                    ) : error ? (
+                        <div className="text-red-500">{error}</div>
+                    ) : (
+                        <div className="space-y-8">
+                            {data.map((zone) => (
                                 selectedZone === zone.title && (
                                     <Zone 
                                         key={zone.title} 
@@ -162,19 +158,19 @@ const App = () => {
                                 )
                             ))}
                         </div>
-
-                        <div className="text-center mt-6 text-muted-foreground" id="clock"></div>
-                        <CustomModal 
-                            modalSrc={modalSrc} 
-                            handleModalClose={handleModalClose}
-                            webcamUrls={currentWebcamUrls}
-                            currentIndex={currentImageIndex}
-                            onNavigate={handleImageNavigate}
-                            webcamName={currentWebcamNames[currentImageIndex]}
-                            webcamZoom={currentWebcamZooms[currentImageIndex]}
-                        />
-                    </div>
-                )}
+                    )}
+                </main>
+                <div className="text-center mt-6 text-muted-foreground" id="clock"></div>
+                <Modal 
+                    isOpen={!!modalSrc}
+                    onClose={handleModalClose}
+                    imageUrl={modalSrc}
+                    imageUrls={currentWebcamUrls}
+                    currentIndex={currentImageIndex}
+                    onNavigate={handleImageNavigate}
+                    imageNames={currentWebcamNames}
+                    imageZooms={currentWebcamZooms}
+                />
             </div>
         </ThemeProvider>
     );

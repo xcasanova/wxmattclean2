@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Cloud, RefreshCw } from "lucide-react";
 import { Button } from "../components/ui/button";
 
@@ -47,11 +47,13 @@ const highlightKeywords = (text) => {
 };
 
 const ForecastContent = ({ forecast, onRefresh }) => {
+    const [showFull, setShowFull] = useState(false);
     const content = forecast ? (
         typeof forecast.data === 'string' ? forecast.data : JSON.stringify(forecast.data, null, 2)
     ) : (
         'Loading forecast...'
     );
+    const trimmedContent = content.length > 250 ? content.substring(0, 250) + '...' : content;
 
     return (
         <div className="bg-card/50 rounded-lg">
@@ -71,8 +73,16 @@ const ForecastContent = ({ forecast, onRefresh }) => {
             </div>
             <div className="p-4 pt-0">
                 <div className="text-sm">
-                    {highlightKeywords(content)}
+                    {highlightKeywords(showFull ? content : trimmedContent)}
                 </div>
+                {content.length > 250 && (
+                    <button
+                        onClick={() => setShowFull(!showFull)}
+                        className="mt-2 text-sm text-blue-500 hover:text-blue-600 transition-colors"
+                    >
+                        {showFull ? 'Show less' : 'Show more'}
+                    </button>
+                )}
             </div>
         </div>
     );
