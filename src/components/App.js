@@ -23,16 +23,34 @@ const App = () => {
 
     useEffect(() => {
         const loadGoogleAPI = () => {
-            if (!window.gapi) {
-                console.error('Google API not loaded');
+            // Check if gapi is already loaded
+            if (window.gapi) {
+                window.gapi.load('client', initClient);
                 return;
             }
-            window.gapi.load('client', initClient);
+
+            // If not loaded, wait for it to load
+            const checkGapi = setInterval(() => {
+                if (window.gapi) {
+                    clearInterval(checkGapi);
+                    window.gapi.load('client', initClient);
+                }
+            }, 100);
+
+            // Set a timeout to prevent infinite checking
+            setTimeout(() => {
+                clearInterval(checkGapi);
+                if (!window.gapi) {
+                    console.error('Google API failed to load after timeout');
+                    setError('Failed to load Google API. Please refresh the page.');
+                }
+            }, 10000); // 10 second timeout
         };
 
         const initClient = () => {
             if (!config.google.apiKey) {
                 console.error('Google API key not set');
+                setError('Google API key not configured');
                 return;
             }
 
@@ -44,6 +62,7 @@ const App = () => {
                 fetchData();
             }).catch(error => {
                 console.error('Error initializing GAPI client:', error);
+                setError('Failed to initialize Google API client. Please refresh the page.');
             });
         };
 
@@ -125,7 +144,7 @@ const App = () => {
                                     onValueChange={handleZoneChange}
                                 >
                                     <SelectTrigger className="w-full md:w-[200px]">
-                                        <SelectValue placeholder="Select a zone" />
+                                        <SelectValue placeholder="Select a region" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {data.map((zone) => (

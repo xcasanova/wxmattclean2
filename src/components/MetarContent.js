@@ -19,9 +19,6 @@ const MetarContent = ({ metar, isError, airportCode }) => {
     const reportedTime = new Date(data.observed + "Z");
     const timeAgo = timeSince(reportedTime);
 
-
-    console.log(data);
-
     return (
         <Card className={cn("bg-card/50 mb-4", data.ceiling && "border-red-500/20 border bg-red-500/10")}>
             <CardHeader className="m-0 pr-4 pl-4">
